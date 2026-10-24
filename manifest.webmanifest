@@ -1,1 +1,43 @@
-{"name":"نوتتي الذكية","short_name":"نوتتي","lang":"ar","dir":"rtl","start_url":"./index.html","display":"standalone","background_color":"#14213D","theme_color":"#14213D","icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
+{
+  "name": "نوتتي الذكية",
+  "short_name": "نوتتي",
+  "description": "مساعدك الصوتي الذكي لتسجيل النوتات والمصروفات والمواعيد بالعامية المصرية",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0F1B33",
+  "theme_color": "#0F1B33",
+  "categories": ["productivity", "finance", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "🎙️ تسجيل صوتي سريع",
+      "short_name": "تسجيل صوتي",
+      "description": "افتح المايك وسجل معاملتك فوراً",
+      "url": "./index.html#mic",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "💰 تسجيل مصروف",
+      "short_name": "المصروفات",
+      "description": "تسجيل مصروف أو دخل جديد",
+      "url": "./index.html#money",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

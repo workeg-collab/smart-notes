@@ -197,6 +197,12 @@ nav .brand,nav .lockbtn,nav .adminbtn,nav .user-desk{display:none}
 .uc-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .uc-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line);margin-top:10px}
 
+/* Installation Shortcut Modal Styles */
+.install-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#0F1B33,#1E293B);color:var(--acc);display:grid;place-items:center;font-size:36px;margin:0 auto 14px;box-shadow:0 8px 24px rgba(242,163,58,.3);border:2px solid rgba(242,163,58,.4)}
+.ios-guide-box{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:start;font-size:14px;margin-bottom:16px}
+.ios-step{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ios-num{width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;font-size:12px;display:grid;place-items:center;flex:none}
+
 @media (min-width:900px){
   body{padding-bottom:0}
   nav{inset:0 0 0 auto;width:244px;flex-direction:column;justify-content:flex-start;background:var(--side);border:0;padding:24px 16px;gap:6px}
@@ -319,7 +325,7 @@ nav .brand,nav .lockbtn,nav .adminbtn,nav .user-desk{display:none}
     <!-- Ambiguity Box (Shown when income vs expense is unclear) -->
     <div id="vc-ambig-box" class="vc-ambig-banner" hidden>
       <div style="font-weight:800;font-size:14px;color:var(--ink)">
-        🤔 لم نحدد إذا كان هذا المبلغ مصروف أم دخل؟ اختر بالأسفل:
+        🤔 يا هندسة، المبلغ ده مصروف خرج منك ولا دخل استلمته؟
       </div>
       <div class="vc-ambig-grid">
         <button class="vc-choice-btn out" id="btn-choice-out">🔴 مصروف خرج مني</button>
@@ -434,6 +440,46 @@ nav .brand,nav .lockbtn,nav .adminbtn,nav .user-desk{display:none}
   </div>
 </div>
 
+<!-- Installation Shortcut Prompt Modal (Shows once on activation / mobile) -->
+<div id="install-modal" class="overlay" hidden>
+  <div class="m-box" style="text-align:center">
+    <div class="install-icon">📲</div>
+    <h2 style="margin:0 0 6px;font-size:21px;font-weight:900;color:var(--ink)">ضيف التطبيق على شاشة موبايلك!</h2>
+    <p class="meta" style="margin:0 0 16px;font-size:14px;line-height:1.6">
+      عشان بضغطة واحدة من شاشة تليفونك تفتح المايك وتسجل نوتاتك ومصروفاتك في ثواني بدون متصفح وبكل سهولة.
+    </p>
+
+    <!-- Android 1-Click Install Button -->
+    <div id="android-install-area" hidden>
+      <button class="btn acc" id="btn-pwa-install-action" style="width:100%;padding:14px;font-size:16px;margin-bottom:10px">
+        📲 تثبيت التطبيق على الشاشة الرئيسية الآن
+      </button>
+    </div>
+
+    <!-- iOS Safari 3-Step Guide -->
+    <div id="ios-install-guide" class="ios-guide-box" hidden>
+      <b style="display:block;margin-bottom:10px;color:var(--ink)">خطوات سهلة لإضافته على الآيفون:</b>
+      <div class="ios-step">
+        <span class="ios-num">١</span>
+        <span>اضغط على زر المشاركة أسفل المتصفح (<b>علامة السهم 📤</b>).</span>
+      </div>
+      <div class="ios-step">
+        <span class="ios-num">٢</span>
+        <span>انزل بالقائمة واختار <b>"إضافة إلى الشاشة الرئيسية" (Add to Home Screen ➕)</b>.</span>
+      </div>
+      <div class="ios-step">
+        <span class="ios-num">٣</span>
+        <span>اضغط <b>"إضافة" (Add)</b> أعلى اليمين.</span>
+      </div>
+      <div class="meta" style="margin-top:8px;font-size:12px">
+        ✨ هيظهر لك التطبيق بأيقونته الأنيقة ويفتح كأنه تطبيق موبايل أصلي!
+      </div>
+    </div>
+
+    <button class="btn ghost" id="btn-close-install" style="width:100%">تمام، فهمت ✨</button>
+  </div>
+</div>
+
 <!-- Profile & Subscriptions Modal -->
 <div id="prof-modal" class="overlay" hidden>
   <div class="m-box">
@@ -463,6 +509,11 @@ nav .brand,nav .lockbtn,nav .adminbtn,nav .user-desk{display:none}
         <li>تنبيهات الأقساط ومواعيد الفواتير</li>
       </ul>
     </div>
+
+    <!-- PWA Install Shortcut Button in Profile -->
+    <button class="btn ghost" id="btn-prof-install" style="width:100%;margin-bottom:12px;font-size:14px">
+      📲 إضافة شورت كت على شاشة الموبايل
+    </button>
 
     <!-- Admin Fast Link -->
     <div style="background:var(--bg);border:1px dashed var(--line);border-radius:16px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
@@ -574,7 +625,7 @@ nav .brand,nav .lockbtn,nav .adminbtn,nav .user-desk{display:none}
 </button>
 <div id="vt" class="vt" hidden>
   <div class="voice-wave"><span></span><span></span><span></span><span></span></div>
-  <span id="vt-text">بسمعك… اتكلم</span>
+  <span id="vt-text">بسمعك… اتكلم براحتك</span>
 </div>
 
 <!-- Main App & Navigation Containers -->
@@ -661,7 +712,7 @@ function ensureProfilesSeeded() {
         tier: 'pro_monthly',
         status: 'active',
         created_at: now - 27 * 864e5,
-        expires_at: now + 3 * 864e5, // Expiring in 3 days!
+        expires_at: now + 3 * 864e5,
         items_count: 19
       },
       {
@@ -670,7 +721,7 @@ function ensureProfilesSeeded() {
         email: 'marwan99@hotmail.com',
         phone: '01234567890',
         tier: 'beta_free',
-        status: 'suspended', // Suspended account!
+        status: 'suspended',
         created_at: now - 60 * 864e5,
         expires_at: now - 10 * 864e5,
         items_count: 6
@@ -689,7 +740,6 @@ function ensureProfilesSeeded() {
     ];
     saveProfiles();
   } else if (USER) {
-    // Ensure current user is in PROFILES
     const idx = PROFILES.findIndex(p => p.id === USER.id || p.email === USER.email);
     if (idx === -1) {
       PROFILES.unshift({
@@ -705,7 +755,6 @@ function ensureProfilesSeeded() {
       });
       saveProfiles();
     } else {
-      // Keep sync
       USER.status = PROFILES[idx].status || 'active';
       USER.tier = PROFILES[idx].tier || 'beta_free';
       USER.expires_at = PROFILES[idx].expires_at;
@@ -739,7 +788,6 @@ class SoundFx {
       if (!this.ctx) return;
       const t = this.ctx.currentTime;
       if (type === 'start') {
-        // High crisp rising tone (chime up: 520Hz -> 880Hz)
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.connect(gain);
@@ -752,7 +800,6 @@ class SoundFx {
         osc.start(t);
         osc.stop(t + 0.18);
       } else if (type === 'stop') {
-        // Falling tone (chime down: 780Hz -> 440Hz)
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.connect(gain);
@@ -765,7 +812,6 @@ class SoundFx {
         osc.start(t);
         osc.stop(t + 0.18);
       } else if (type === 'confirm') {
-        // Success chord (C5, E5, G5)
         [523.25, 659.25, 783.99].forEach(freq => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
@@ -779,7 +825,6 @@ class SoundFx {
           osc.stop(t + 0.35);
         });
       } else if (type === 'ambig') {
-        // Attention prompt chime
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.connect(gain);
@@ -808,17 +853,21 @@ class SoundFx {
 }
 const sfx = new SoundFx();
 
-// Egyptian Arabic Speech Synthesis
+// Authentic Egyptian Colloquial Speech Synthesis
 function speak(text) {
   try {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ar-EG';
-    u.rate = 1.05;
+    u.rate = 1.08;
+    u.pitch = 1.02;
+
     const voices = window.speechSynthesis.getVoices();
-    const arVoice = voices.find(v => v.lang.includes('ar-EG') || v.lang.includes('ar'));
-    if (arVoice) u.voice = arVoice;
+    let v = voices.find(x => x.lang === 'ar-EG' || x.lang === 'ar_EG');
+    if (!v) v = voices.find(x => /Salma|Shakir|Maged|Tarik|Hoda|Zeina|Laila|Egyptian/i.test(x.name) && x.lang.startsWith('ar'));
+    if (!v) v = voices.find(x => x.lang.startsWith('ar'));
+    if (v) u.voice = v;
     window.speechSynthesis.speak(u);
   } catch(e) {}
 }
@@ -937,6 +986,7 @@ function del(id) {
     if (p) { p.items_count = S.items.length; saveProfiles(); }
   }
   sfx.play('stop');
+  speak('اتمسحت يا غالي، ولا تشيل هم! 🗑️');
   toast = '🗑️ تم حذف المعاملة';
   render();
 }
@@ -946,13 +996,13 @@ function del(id) {
 // ==========================================
 function checkSuspendedStatus() {
   if (!USER) return false;
-  // Look up status in PROFILES
   const p = PROFILES.find(x => x.id === USER.id || x.email === USER.email);
   if (p && p.status === 'suspended') {
     $('#suspended-modal').hidden = false;
     $('#auth-modal').hidden = true;
     $('#lock-modal').hidden = true;
     $('#prof-modal').hidden = true;
+    $('#install-modal').hidden = true;
     return true;
   }
   $('#suspended-modal').hidden = true;
@@ -960,7 +1010,42 @@ function checkSuspendedStatus() {
 }
 
 // ==========================================
-// 7. Auth, Lock & Profile UI
+// 7. PWA Installation Shortcut Prompt
+// ==========================================
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if ($('#android-install-area')) $('#android-install-area').hidden = false;
+});
+
+function isIosDevice() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function isPwaStandalone() {
+  return ('standalone' in navigator && navigator.standalone) ||
+         window.matchMedia('(display-mode: standalone)').matches;
+}
+
+function checkAndShowInstallPrompt() {
+  if (isPwaStandalone()) return;
+  if (localStorage.getItem('sn_install_prompted')) return;
+
+  setTimeout(() => {
+    showInstallModal();
+  }, 1000);
+}
+
+function showInstallModal() {
+  const isIos = isIosDevice();
+  $('#ios-install-guide').hidden = !isIos;
+  $('#android-install-area').hidden = isIos;
+  $('#install-modal').hidden = false;
+}
+
+// ==========================================
+// 8. Auth, Lock & Profile UI
 // ==========================================
 function checkAuthState() {
   if (isAdminPath()) {
@@ -978,6 +1063,11 @@ function checkAuthState() {
     $('#lock-modal').hidden = true;
     render();
     syncFromCloud();
+    checkAndShowInstallPrompt();
+
+    if (window.location.hash === '#mic' || window.location.search.includes('mic')) {
+      setTimeout(() => { micToggle(); }, 500);
+    }
   }
 }
 
@@ -1008,7 +1098,7 @@ function showQuickLock() {
   $('#prof-modal').hidden = true;
   const initial = USER?.name ? USER.name[0] : 'ن';
   $('#lock-av').textContent = initial;
-  $('#lock-greet').textContent = `أهلاً يا ${USER?.name ? USER.name.split(' ')[0] : 'صديقي'} 👋`;
+  $('#lock-greet').textContent = 'أهلاً يا ' + (USER?.name ? USER.name.split(' ')[0] : 'صديقي') + ' 👋';
   $('#pin-quick').value = '';
   $('#pin-quick-err').textContent = '';
   setTimeout(() => $('#pin-quick').focus(), 80);
@@ -1036,7 +1126,6 @@ async function handleRegister() {
   try {
     let uid = 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     
-    // Try Supabase Auth
     if (sb) {
       try {
         const { data, error } = await sb.auth.signUp({
@@ -1065,7 +1154,6 @@ async function handleRegister() {
     localStorage.setItem('sn_user', JSON.stringify(USER));
     saveLocal();
 
-    // Add to PROFILES
     PROFILES.unshift({
       id: uid,
       name,
@@ -1079,7 +1167,6 @@ async function handleRegister() {
     });
     saveProfiles();
 
-    // Encrypt existing passwords if any
     for (const i of S.items) {
       if (i.type === 'password' && i.value !== undefined) {
         PW[i.id] = i.value;
@@ -1092,8 +1179,10 @@ async function handleRegister() {
 
     $('#auth-modal').hidden = true;
     sfx.play('confirm');
-    toast = `أهلاً بك يا ${name.split(' ')[0]}! تم إنشاء حسابك وتفعيل الباقة التجريبية بنجاح ✨`;
+    speak('أهلاً بيك يا ' + name.split(' ')[0] + '، حسابك اتفعل بنجاح وعال العال!');
+    toast = 'أهلاً بك يا ' + name.split(' ')[0] + '! تم إنشاء حسابك وتفعيل الباقة التجريبية بنجاح ✨';
     render();
+    checkAndShowInstallPrompt();
   } catch (err) {
     errBox.textContent = err.message || 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة ثانية.';
   } finally {
@@ -1135,31 +1224,16 @@ async function handleLogin() {
         if (USER && USER.email === email) loggedInUser = USER;
         else {
           const match = PROFILES.find(p => p.email === email);
-          if (match) {
-            loggedInUser = {
-              id: match.id,
-              name: match.name,
-              email: match.email,
-              phone: match.phone,
-              tier: match.tier,
-              status: match.status,
-              joined_at: match.created_at,
-              expires_at: match.expires_at
-            };
-          } else {
-            throw new Error('بيانات الدخول غير صحيحة، يرجى إنشاء حساب جديد أو التحقق.');
-          }
+          if (match) loggedInUser = { ...match, joined_at: match.created_at };
+          else throw new Error('بيانات الدخول غير صحيحة، يرجى إنشاء حساب جديد أو التحقق.');
         }
       }
     } else if (USER && USER.email === email) {
       loggedInUser = USER;
     } else {
       const match = PROFILES.find(p => p.email === email);
-      if (match) {
-        loggedInUser = { ...match, joined_at: match.created_at };
-      } else {
-        throw new Error('يرجى إنشاء حساب جديد أولاً.');
-      }
+      if (match) loggedInUser = { ...match, joined_at: match.created_at };
+      else throw new Error('يرجى إنشاء حساب جديد أولاً.');
     }
 
     USER = loggedInUser;
@@ -1202,6 +1276,11 @@ async function unlockQuick() {
     sfx.play('confirm');
     render();
     syncFromCloud();
+    checkAndShowInstallPrompt();
+
+    if (window.location.hash === '#mic' || window.location.search.includes('mic')) {
+      setTimeout(() => { micToggle(); }, 400);
+    }
   } catch(e) {
     KEY = null;
     sfx.play('warn');
@@ -1235,10 +1314,11 @@ function openProfile() {
 }
 
 // ==========================================
-// 8. Radical Voice Engine Overhaul & Confirmation
+// 9. Radical Voice Engine Overhaul (Continuous & No Premature Cut-Off)
 // ==========================================
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null;
+let silenceTimer = null;
 let pendingVoiceItem = null;
 
 function vtMsg(m, ms){
@@ -1255,6 +1335,7 @@ function micToggle() {
   if (!SR) return vtMsg('المتصفح مش بيدعم التسجيل الصوتي. استخدم Edge أو Chrome.', 4000);
   
   if (rec) {
+    clearTimeout(silenceTimer);
     rec.stop();
     return;
   }
@@ -1264,12 +1345,12 @@ function micToggle() {
   rec = new SR();
   rec.lang = 'ar-EG';
   rec.interimResults = true;
-  rec.continuous = false;
+  rec.continuous = true;
 
   rec.onstart = () => {
     sfx.play('start');
     b.classList.add('on');
-    vtMsg('بسمعك… اتكلم');
+    vtMsg('🎙️ بسمعك… اتكلم براحتك');
   };
 
   rec.onresult = e => {
@@ -1277,15 +1358,24 @@ function micToggle() {
     for (const r of e.results) t += r[0].transcript + ' ';
     fin = t.trim();
     vtMsg(fin);
+
+    clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      if (rec) {
+        rec.stop();
+      }
+    }, 2200);
   };
 
   rec.onerror = e => {
+    clearTimeout(silenceTimer);
     fin = '';
     sfx.play('warn');
     vtMsg(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'اسمح للمتصفح باستخدام الميكروفون.' : 'مسمعتش حاجة، جرّب تاني.', 3500);
   };
 
   rec.onend = () => {
+    clearTimeout(silenceTimer);
     rec = null;
     b.classList.remove('on');
     sfx.play('stop');
@@ -1294,7 +1384,7 @@ function micToggle() {
       const it = classify(fin);
       openVoiceConfirmModal(it);
     } else {
-      if ($('#vt-text').textContent.startsWith('بسمعك')) $('#vt').hidden = true;
+      if ($('#vt-text').textContent.startsWith('🎙️')) $('#vt').hidden = true;
     }
   };
 
@@ -1310,7 +1400,6 @@ function openVoiceConfirmModal(it) {
   $('#vc-who').value = it.who || '';
   $('#vc-note').value = it.text || '';
 
-  // Setup category dropdown
   $('#vc-cat').innerHTML = CATS.map(c => `<option value="${c[0]}" ${it.cat === c[0] ? 'selected' : ''}>${c[0]}</option>`).join('') + `<option value="عام" ${it.cat === 'عام' ? 'selected' : ''}>عام</option>`;
 
   const ambigBox = $('#vc-ambig-box');
@@ -1320,7 +1409,7 @@ function openVoiceConfirmModal(it) {
     ambigBox.hidden = false;
     typeBadge.textContent = '❓ بحاجة لتحديد النوع';
     typeBadge.className = 'plan-badge suspended';
-    const spoken = `المعاملة بمبلغ ${it.amount || ''} جنيه. هل دي مصروف ولا دخل؟`;
+    const spoken = 'يا هندسة، المبلغ ده ' + (it.amount || '') + ' جنيه ' + (it.who ? 'لـ ' + it.who : '') + '.. هل ده مصروف خرج منك ولا دخل استلمته؟';
     speak(spoken);
   } else {
     ambigBox.hidden = true;
@@ -1329,14 +1418,17 @@ function openVoiceConfirmModal(it) {
     let spoken = '';
     if (it.type === 'money') {
       spoken = it.kind === 'in'
-        ? `سجلت لك دخل بمبلغ ${it.amount} جنيه ${it.who ? 'من ' + it.who : ''}. تأكيد الحفظ؟`
-        : `سجلت لك مصروف ${it.amount} جنيه ${it.who ? 'لـ ' + it.who : ''}. تأكيد الحفظ؟`;
+        ? 'رزق واسع يا رب! سجلتلك دخل بمبلغ ' + it.amount + ' جنيه ' + (it.who ? 'من ' + it.who : '') + '. تأكيد الحفظ يا باشا؟'
+        : 'سجلتلك مصروف ' + it.amount + ' جنيه ' + (it.who ? 'لـ ' + it.who : '') + '. أحفظه يا غالي؟';
     } else if (it.type === 'reminder') {
-      spoken = `سجلت لك تذكير: ${it.text}. تأكيد الحفظ؟`;
+      const dateStr = it.at ? new Date(it.at).toLocaleDateString('ar-EG', { day:'numeric', month:'long', year:'numeric' }) : '';
+      spoken = it.at 
+        ? 'يا باشا، سجلتلك ميعاد يوم ' + dateStr + '. تحب أأكده واحفظه؟'
+        : 'سجلتلك تذكير يا باشا: ' + it.text + '. تأكيد الحفظ؟';
     } else if (it.type === 'password') {
-      spoken = `سجلت لك كلمة مرور جديدة. تأكيد الحفظ؟`;
+      spoken = 'يا باشا، حفظتلك كلمة سر ' + (it.label || 'الحساب') + ' مشفرة في الخزنة 🔒. تأكيد الحفظ؟';
     } else {
-      spoken = `سجلت لك ملاحظة جديدة: ${it.text}. تأكيد الحفظ؟`;
+      spoken = 'سجلتلك الملاحظة دي يا غالي. أحفظها على طول؟';
     }
     speak(spoken);
   }
@@ -1350,7 +1442,7 @@ function updateVoiceModalBadge(it) {
     typeBadge.textContent = it.kind === 'in' ? '🟢 دخل وإيراد' : '🔴 مصروفات';
     typeBadge.className = 'plan-badge ' + (it.kind === 'in' ? 'active' : 'suspended');
   } else if (it.type === 'reminder') {
-    typeBadge.textContent = '⏰ تذكير / قسط';
+    typeBadge.textContent = '⏰ تذكير وموعد';
     typeBadge.className = 'plan-badge';
   } else if (it.type === 'password') {
     typeBadge.textContent = '🔒 كلمة مرور مشفرة';
@@ -1371,9 +1463,8 @@ function setVoiceChoice(type, kind) {
   sfx.play('start');
 
   const amt = parseFloat($('#vc-amount').value) || pendingVoiceItem.amount || 0;
-  const who = $('#vc-who').value.trim() || pendingVoiceItem.who || '';
   if (type === 'money') {
-    speak(kind === 'in' ? `تمام، دخل ${amt} جنيه. تأكيد؟` : `تمام، مصروف ${amt} جنيه. تأكيد؟`);
+    speak(kind === 'in' ? 'تمام يا باشا، دخل ' + amt + ' جنيه. تأكيد؟' : 'تمام يا غالي، مصروف ' + amt + ' جنيه. تأكيد؟');
   }
 }
 
@@ -1393,7 +1484,7 @@ async function confirmVoiceItem() {
   }
 
   sfx.play('confirm');
-  speak('تم الحفظ بنجاح');
+  speak('اتحفظت تمام يا باشا وعال العال! ✨');
   toast = '✔ تم تسجيل وتأكيد المعاملة بنجاح';
   $('#voice-confirm-modal').hidden = true;
   pendingVoiceItem = null;
@@ -1404,6 +1495,7 @@ function cancelVoiceItem() {
   $('#voice-confirm-modal').hidden = true;
   pendingVoiceItem = null;
   sfx.play('stop');
+  speak('اتمسحت ولا تشيل هم! 🗑️');
 }
 
 async function sealPw(it) {
@@ -1412,12 +1504,249 @@ async function sealPw(it) {
   delete it.value;
   it.text = it.label || it.text;
   add(it);
-  toast = '🔒 اتسجّلت كـ باسورد مشفّر';
+  toast = '🔒 اتسجّلت كـ باسورد مشفّر في الخزنة';
   render();
 }
 
 // ==========================================
-// 9. Full CRUD Engine (Add, Edit, Delete)
+// 10. Comprehensive Egyptian Dialect Intelligence (Dates, Reminders, Passwords)
+// ==========================================
+const REMK = { normal:['⏰','تذكير'], installment:['💳','قسط'], bill:['🧾','فاتورة'], receivable:['📥','فلوس ليا برة'], payable:['📤','فلوس عليا'] };
+const REC = { none:'', week:'أسبوعي', month:'شهري', year:'سنوي' };
+const kk = i => REMK[i.kind||'normal'] || REMK.normal;
+const remIcon = i => kk(i)[0], remTitle = i => kk(i)[1];
+const remLine = i => ((i.kind&&i.kind!=='normal')?kk(i)[1]+': ':'')+i.text+(i.amount?' — '+egp(i.amount):'')+(i.who?' ('+i.who+')':'');
+const daysLeft = i => { const d = Math.ceil((i.at-Date.now())/864e5); return d<=1?'أقل من يوم':d+' أيام'; };
+
+const AR_MONTHS = {
+  'يناير': 1, 'فبراير': 2, 'مارس': 3, 'ابريل': 4, 'أبريل': 4,
+  'مايو': 5, 'يونيو': 6, 'يونية': 6, 'يوليو': 7, 'يولية': 7,
+  'اغسطس': 8, 'أغسطس': 8, 'سبتمبر': 9, 'اكتوبر': 10, 'أكتوبر': 10,
+  'نوفمبر': 11, 'ديسمبر': 12
+};
+
+function parseWhen(raw) {
+  const t = raw.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).trim();
+  const n = new Date();
+  let d = new Date(n);
+  let dateFound = false;
+
+  // 1. Matches: 25-12 2026 or 25-12-2026 or 25/12/2026 or 25.12.2026 or 25 12 2026
+  let m = t.match(/(?:يوم\s*)?(\d{1,2})[\/\-\.\s]+(\d{1,2})(?:[\/\-\.\s]+(\d{2,4}))?/);
+  if (m && +m[1] >= 1 && +m[1] <= 31 && +m[2] >= 1 && +m[2] <= 12) {
+    const day = +m[1];
+    const month = +m[2] - 1;
+    let year = m[3] ? (+m[3] < 100 ? 2000 + +m[3] : +m[3]) : n.getFullYear();
+    if (!m[3] && (new Date(year, month, day) < n)) year++;
+    d = new Date(year, month, day);
+    dateFound = true;
+  }
+  // 2. Matches: 25 ديسمبر 2026 or 25 ديسمبر
+  else if (m = t.match(new RegExp('(?:يوم\\s*)?(\\d{1,2})\\s*(' + Object.keys(AR_MONTHS).join('|') + ')(?:\\s*(\\d{4}))?'))) {
+    const day = +m[1];
+    const month = AR_MONTHS[m[2]] - 1;
+    let year = m[3] ? +m[3] : n.getFullYear();
+    if (!m[3] && (new Date(year, month, day) < n)) year++;
+    d = new Date(year, month, day);
+    dateFound = true;
+  }
+  // 3. Matches: يوم 25
+  else if (m = t.match(/يوم\s*(\d{1,2})(?!\s*(?:سنة|شهر|\d))/)) {
+    if (+m[1] >= 1 && +m[1] <= 31) {
+      d.setDate(+m[1]);
+      if (d < n) d.setMonth(d.getMonth() + 1);
+      dateFound = true;
+    }
+  }
+  // 4. Matches: بكرة / بعد بكرة / كمان اسبوع / بعد اسبوع
+  else if (/بعد\s*بكر[هة]/.test(t)) { d.setDate(d.getDate() + 2); dateFound = true; }
+  else if (/بكر[هة]/.test(t)) { d.setDate(d.getDate() + 1); dateFound = true; }
+  else if (/بعد\s*(?:اسبوع|أسبوع)/.test(t)) { d.setDate(d.getDate() + 7); dateFound = true; }
+  else if (/بعد\s*شهر/.test(t)) { d.setMonth(d.getMonth() + 1); dateFound = true; }
+  else if (m = t.match(/كمان\s*(\d+)\s*(يوم|ايام|أيام|ساع[هة]|ساعات|دقيق[هة]|دقايق|اسبوع|أسبوع|شهر)/)) {
+    const k = +m[1], u = m[2]; dateFound = true;
+    if (/ساع/.test(u)) d.setHours(d.getHours() + k);
+    else if (/دق/.test(u)) d.setMinutes(d.getMinutes() + k);
+    else if (/يوم|ايام|أيام/.test(u)) d.setDate(d.getDate() + k);
+    else if (/شهر/.test(u)) d.setMonth(d.getMonth() + k);
+    else d.setDate(d.getDate() + 7 * k);
+  }
+
+  // 5. Matches Days of Week
+  const DAYS = ['الأحد|الاحد','الاثنين|الإثنين|الاتنين','الثلاثاء|التلات','الأربعاء|الاربعاء|الاربع','الخميس','الجمعة|الجمعه','السبت'];
+  if (!dateFound) {
+    for (let i = 0; i < 7; i++) {
+      if (new RegExp('(?:يوم\\s*)?(' + DAYS[i] + ')').test(t)) {
+        let diff = (i - n.getDay() + 7) % 7 || 7;
+        d.setDate(d.getDate() + diff);
+        dateFound = true;
+        break;
+      }
+    }
+  }
+
+  // Time matching
+  let h = null, mi = 0;
+  if (m = t.match(/(?:الساع[هة]|ساع[هة])\s*(\d{1,2})(?::(\d{2}))?\s*(ص|م|صباح|مساء|الصبح|العصر|بالليل|الليل)?/)) {
+    h = +m[1]; mi = +(m[2] || 0); const p = m[3] || '';
+    if (/م|مساء|العصر|ليل/.test(p)) { if (h < 12) h += 12; }
+    else if (!p && h >= 1 && h <= 6) h += 12;
+  } else if (m = t.match(/(\d{1,2}):(\d{2})/)) {
+    h = +m[1]; mi = +m[2];
+  }
+
+  if (h !== null) {
+    d.setHours(h, mi, 0, 0);
+    return d;
+  }
+  if (dateFound) {
+    d.setHours(10, 0, 0, 0);
+    return d;
+  }
+  return null;
+}
+
+function parsePassword(raw, t) {
+  const isPw = /باسورد|بسورد|كلم[هة]\s*(ال)?سر|الرقم\s*السري|رمز\s*السري|رمز\s*الدخول|password|\bpass\b|\bpw\b|\bpin\b|بن\s*كود/i.test(t);
+  if (!isPw) return null;
+
+  let label = 'بدون عنوان', val = '';
+  if (t.includes(':') || t.includes('=')) {
+    const parts = t.split(/[:=]/);
+    label = parts[0].replace(/باسورد|بسورد|كلم[هة]\s*(ال)?سر|الرقم\s*السري|احفظ|سجل/gi, '').trim() || 'كلمة مرور';
+    val = parts.slice(1).join(':').trim();
+  } else if (/\sهو\s|\sهي\s/.test(t)) {
+    const parts = t.split(/\s(?:هو|هي)\s/);
+    label = parts[0].replace(/باسورد|بسورد|كلم[هة]\s*(ال)?سر|الرقم\s*السري|احفظ|سجل/gi, '').trim() || 'كلمة مرور';
+    val = parts[1].trim();
+  } else {
+    const tokens = t.split(/\s+/);
+    let triggerIdx = tokens.findIndex(tk => /باسورد|بسورد|سر|password|pass|pw/i.test(tk));
+    if (tokens.length >= 3) {
+      val = tokens[tokens.length - 1];
+      label = tokens.slice(triggerIdx + 1, tokens.length - 1).join(' ') || 'كلمة مرور';
+      label = label.replace(/^(بتاع[هة]?|للـ?|لـ|عن)\s*/, '');
+    } else if (tokens.length === 2) {
+      val = tokens[1];
+      label = 'كلمة مرور';
+    } else {
+      val = t;
+      label = 'كلمة مرور';
+    }
+  }
+
+  label = label.replace(/^(الـ|ال)?/, 'ال').trim();
+  if (!label || label === 'ال') label = 'حسابي';
+
+  return { type: 'password', label, value: val, text: label + ': ' + val };
+}
+
+const whoOf = t => { const m = t.match(/(?:^|\s)(?:عند|من|لل?|لـ?|بـ?|مع)\s*(?:ال)?([\u0600-\u06FFA-Za-z]{2,})/); return m ? m[1] : ''; };
+
+function classify(raw) {
+  const t = raw.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).trim();
+  const it = { id: uid(), ts: Date.now(), text: raw.trim() };
+
+  // 1. Password check
+  const pwObj = parsePassword(raw, t);
+  if (pwObj) {
+    return Object.assign(it, pwObj);
+  }
+
+  const num = (t.match(/(\d+(?:[.,]\d+)?)/) || [])[1];
+  const numVal = num ? +num.replace(',', '.') : null;
+
+  // 2. Explicit Expense vs Income
+  const isExp = /صرفت|دفعت|اشتريت|حاسبت|سددت|خدت بـ|خرجت|مصروف|تكلفة|شراء|اشتري/.test(t);
+  const isInc = /قبضت|استلمت|اتحول|حولولي|مرتب|راتب|ايراد|إيراد|دخل|مكافأة|مكافاه|ارباح|أرباح/.test(t);
+
+  if (numVal && isExp && !isInc) {
+    return Object.assign(it, { type: 'money', kind: 'out', amount: numVal, cat: cat(t), who: whoOf(t.replace(num, ' ')) });
+  }
+  if (numVal && isInc && !isExp) {
+    return Object.assign(it, { type: 'money', kind: 'in', amount: numVal, cat: 'دخل', who: whoOf(t.replace(num, ' ')) });
+  }
+
+  // 3. Reminders & Dates
+  const isRemWord = /موعد|ميعاد|ميعادي|معاد|كشف|اجتماع|ميتينج|مقابلة|انترفيو|جلسة|استشارة|عملية|تحليل|فكرني|فكرنا|نبهني|تذكير|متنساش|ماتنساش|امتحان|درس|محاضرة|حجز|سفر|طيران/.test(t);
+  const when = parseWhen(t);
+  const rec = /كل\s*اسبوع|كل\s*أسبوع|اسبوعي|أسبوعي/.test(t)?'week':/كل\s*شهر|شهري/.test(t)?'month':/كل\s*سن[هة]|سنوي/.test(t)?'year':'none';
+  const kind = /(?:فلوس|مبلغ|سلف[هة]|دين)\s*(?:ليا|لي|لى)|(?:ليا|لي|لى)\s*(?:عند|فلوس|مبلغ)|عند\s*\S+\s*(?:فلوس|مبلغ|سلف)|هيرجع|هترجع|هيسدد|اسلفت|سلفت/.test(t)?'receivable':/(?:فلوس|مبلغ|سلف[هة]|دين)\s*عليا|عليا\s*(?:فلوس|مبلغ|سلف|دين)|لازم\s*(?:ا|أ)دفع|هسدد|استلفت|اقترضت/.test(t)?'payable':/قسط|اقساط|أقساط/.test(t)?'installment':/فاتور[هة]|ايجار|إيجار|اشتراك|رسوم|كهرب|ميه|مياه|غاز|انترنت|إنترنت/.test(t)?'bill':'normal';
+
+  if (when || isRemWord || kind !== 'normal') {
+    const atTime = when ? when.getTime() : (Date.now() + 864e5);
+    const o = { type: 'reminder', at: atTime, done: false, fired: false, pfired: false, kind, rec, lead: kind==='normal'?0:1 };
+    if (kind !== 'normal') {
+      o.amount = numVal || 0;
+      o.who = whoOf(t);
+    } else {
+      o.amount = 0;
+      o.who = whoOf(t);
+    }
+    return Object.assign(it, o);
+  }
+
+  // 4. Ambiguous financial transactions (numbers mentioned without explicit direction)
+  if (numVal || /جنيه|جنية|مبلغ|فلوس/.test(t)) {
+    return Object.assign(it, {
+      type: 'money',
+      kind: 'out',
+      isAmbiguous: true,
+      amount: numVal || 0,
+      cat: cat(t),
+      who: whoOf(t.replace(num || '', ' '))
+    });
+  }
+
+  if (/https?:\/\//.test(t)) return Object.assign(it, { type: 'link' });
+  if (/(?:\+?\d[\d\s-]{8,}\d)/.test(t)) return Object.assign(it, { type: 'phone' });
+  return Object.assign(it, { type: 'note' });
+}
+
+// Helpers
+function preCheck(i, n) {
+  if (i.type!=='reminder'||i.done||i.pfired||!i.lead||i.at<=n||i.at-i.lead*864e5>n) return false;
+  i.pfired = true;
+  try { if (Notification.permission==='granted') new Notification(remTitle(i)+' قريب', { body: remLine(i)+' — باقي '+daysLeft(i) }); } catch(e){}
+  try { navigator.vibrate&&navigator.vibrate(200); } catch(e){}
+  return true;
+}
+
+function nextAt(i) {
+  const d = new Date(i.at), n = Date.now(); let g = 0;
+  do {
+    if (i.rec==='week') d.setDate(d.getDate()+7);
+    else if (i.rec==='month') { const day = i.day||d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+1); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate())); }
+    else d.setFullYear(d.getFullYear()+1);
+  } while (d.getTime()<=n && ++g<500);
+  return d.getTime();
+}
+
+function completeRem(id, rec) {
+  const i = S.items.find(x => x.id === id); if (!i) return;
+  if (rec && i.amount) {
+    const inc = i.kind === 'receivable';
+    add({ id: uid(), ts: Date.now(), type: 'money', kind: inc?'in':'out', amount: i.amount, cat: inc?'دخل':i.kind==='installment'?'أقساط':i.kind==='bill'?'فواتير':'عام', who: i.who||'', text: remLine(i) });
+    toast = 'اتسجّلت في المصروفات والدخل';
+  }
+  if (i.rec && i.rec!=='none') { if (!i.day) i.day = new Date(i.at).getDate(); i.at = nextAt(i); i.fired = false; i.pfired = false; } else i.done = true;
+  save(); cloudUpsert(i); render();
+}
+
+function snooze(id) {
+  const i = S.items.find(x => x.id === id);
+  if (i) { i.at += 864e5; i.fired = false; i.pfired = false; save(); cloudUpsert(i); render(); }
+}
+
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const fmt = ts => new Date(ts).toLocaleString('ar-EG', { weekday:'short', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' });
+const egp = n => Number(n).toLocaleString('ar-EG') + ' ج.م';
+const CATS = [['أقساط',/قسط|اقساط|أقساط/],['أكل',/اكل|أكل|غدا|عشا|فطار|مطعم|قهوة|كافيه|سوبر ?ماركت|خضار|فاكهة/],['مواصلات',/مواصلات|بنزين|اوبر|أوبر|تاكسي|ميكروباص|مترو|جراج|سيارة|عربية/],['فواتير',/فاتورة|كهرباء|غاز|مياه|نت|انترنت|إنترنت|رصيد|شحن|اشتراك/],['سكن',/ايجار|إيجار|صيانة|سباك|كهربائي/],['صحة',/دكتور|دوا|دواء|صيدلية|علاج|تحاليل|كشف/],['ملابس',/ملابس|هدوم|جزمة|حذاء|قميص|بنطلون/],['ترفيه',/سينما|خروجة|لعبة|رحلة|نتفلكس|ترفيه/],['تعليم',/كورس|كتاب|مصاريف مدرسة|دراسة|جامعة/],['دخل',/مرتب|راتب|عمولة|مكافأة|ايراد|إيراد/]];
+const cat = t => (CATS.find(c => c[1].test(t)) || ['عام'])[0];
+
+// ==========================================
+// 11. Full CRUD Engine (Add, Edit, Delete)
 // ==========================================
 let editingItemId = null;
 
@@ -1432,7 +1761,6 @@ function openEditModal(id) {
   $('#ed-kind').value = item.kind || 'out';
   $('#ed-who').value = item.who || '';
 
-  // setup categories
   $('#ed-cat').innerHTML = CATS.map(c => `<option value="${c[0]}" ${item.cat === c[0] ? 'selected' : ''}>${c[0]}</option>`).join('') + `<option value="عام" ${item.cat === 'عام' ? 'selected' : ''}>عام</option>`;
 
   if (item.type === 'reminder' && item.at) {
@@ -1483,150 +1811,7 @@ function saveEditedItem() {
 }
 
 // ==========================================
-// 10. Intelligence & Dialect Parsing
-// ==========================================
-const REMK = { normal:['⏰','تذكير'], installment:['💳','قسط'], bill:['🧾','فاتورة'], receivable:['📥','فلوس ليا برة'], payable:['📤','فلوس عليا'] };
-const REC = { none:'', week:'أسبوعي', month:'شهري', year:'سنوي' };
-const kk = i => REMK[i.kind||'normal'] || REMK.normal;
-const remIcon = i => kk(i)[0], remTitle = i => kk(i)[1];
-const remLine = i => ((i.kind&&i.kind!=='normal')?kk(i)[1]+': ':'')+i.text+(i.amount?' — '+egp(i.amount):'')+(i.who?' ('+i.who+')':'');
-const daysLeft = i => { const d = Math.ceil((i.at-Date.now())/864e5); return d<=1?'أقل من يوم':d+' أيام'; };
-
-function preCheck(i, n) {
-  if (i.type!=='reminder'||i.done||i.pfired||!i.lead||i.at<=n||i.at-i.lead*864e5>n) return false;
-  i.pfired = true;
-  try { if (Notification.permission==='granted') new Notification(remTitle(i)+' قريب', { body: remLine(i)+' — باقي '+daysLeft(i) }); } catch(e){}
-  try { navigator.vibrate&&navigator.vibrate(200); } catch(e){}
-  return true;
-}
-
-function nextAt(i) {
-  const d = new Date(i.at), n = Date.now(); let g = 0;
-  do {
-    if (i.rec==='week') d.setDate(d.getDate()+7);
-    else if (i.rec==='month') { const day = i.day||d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+1); d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate())); }
-    else d.setFullYear(d.getFullYear()+1);
-  } while (d.getTime()<=n && ++g<500);
-  return d.getTime();
-}
-
-function completeRem(id, rec) {
-  const i = S.items.find(x => x.id === id); if (!i) return;
-  if (rec && i.amount) {
-    const inc = i.kind === 'receivable';
-    add({ id: uid(), ts: Date.now(), type: 'money', kind: inc?'in':'out', amount: i.amount, cat: inc?'دخل':i.kind==='installment'?'أقساط':i.kind==='bill'?'فواتير':'عام', who: i.who||'', text: remLine(i) });
-    toast = 'اتسجّلت في المصروفات والدخل';
-  }
-  if (i.rec && i.rec!=='none') { if (!i.day) i.day = new Date(i.at).getDate(); i.at = nextAt(i); i.fired = false; i.pfired = false; } else i.done = true;
-  save(); cloudUpsert(i); render();
-}
-
-function snooze(id) {
-  const i = S.items.find(x => x.id === id);
-  if (i) { i.at += 864e5; i.fired = false; i.pfired = false; save(); cloudUpsert(i); render(); }
-}
-
-const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const norm = t => t.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-const fmt = ts => new Date(ts).toLocaleString('ar-EG', { weekday:'short', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' });
-const egp = n => Number(n).toLocaleString('ar-EG') + ' ج.م';
-const CATS = [['أقساط',/قسط|اقساط|أقساط/],['أكل',/اكل|أكل|غدا|عشا|فطار|مطعم|قهوة|كافيه|سوبر ?ماركت|خضار|فاكهة/],['مواصلات',/مواصلات|بنزين|اوبر|أوبر|تاكسي|ميكروباص|مترو|جراج|سيارة|عربية/],['فواتير',/فاتورة|كهرباء|غاز|مياه|نت|انترنت|إنترنت|رصيد|شحن|اشتراك/],['سكن',/ايجار|إيجار|صيانة|سباك|كهربائي/],['صحة',/دكتور|دوا|دواء|صيدلية|علاج|تحاليل|كشف/],['ملابس',/ملابس|هدوم|جزمة|حذاء|قميص|بنطلون/],['ترفيه',/سينما|خروجة|لعبة|رحلة|نتفلكس|ترفيه/],['تعليم',/كورس|كتاب|مصاريف مدرسة|دراسة|جامعة/],['دخل',/مرتب|راتب|عمولة|مكافأة|ايراد|إيراد/]];
-const cat = t => (CATS.find(c => c[1].test(t)) || ['عام'])[0];
-const DAYS = ['الأحد|الاحد','الاثنين|الإثنين|الاتنين','الثلاثاء|التلات','الأربعاء|الاربعاء|الاربع','الخميس','الجمعة|الجمعه','السبت'];
-
-function parseWhen(t) {
-  const n = new Date(); let d = new Date(n), date = false, m;
-  if (/بعد\s*بكر[هة]/.test(t)) { d.setDate(d.getDate()+2); date=true; }
-  else if (/بعد\s*(?:اسبوع|أسبوع)/.test(t)) { d.setDate(d.getDate()+7); date=true; }
-  else if (/بعد\s*شهر/.test(t)) { d.setMonth(d.getMonth()+1); date=true; }
-  else if (m = t.match(/بعد\s*(\d+)\s*(يوم|ايام|أيام|ساع[هة]|ساعات|دقيق[هة]|دقايق|اسبوع|أسبوع|شهر)/)) {
-    const k = +m[1], u = m[2]; date = true;
-    if (/ساع/.test(u)) { d.setHours(d.getHours()+k); return d; }
-    if (/دق/.test(u)) { d.setMinutes(d.getMinutes()+k); return d; }
-    if (/يوم|ايام|أيام/.test(u)) d.setDate(d.getDate()+k); else if (/شهر/.test(u)) d.setMonth(d.getMonth()+k); else d.setDate(d.getDate()+7*k);
-  }
-  else if (/بكر[هة]/.test(t)) { d.setDate(d.getDate()+1); date=true; }
-  else if (m = t.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/)) { d = new Date(m[3]?(+m[3]<100?2000+ +m[3]:+m[3]):n.getFullYear(), +m[2]-1, +m[1]); date=true; }
-  else { for(let i=0;i<7;i++){ if(new RegExp('يوم\s*('+DAYS[i]+')').test(t)){ let diff = (i-n.getDay()+7)%7||7; d.setDate(d.getDate()+diff); date=true; } } }
-  if (!date && /النهارد[هة]|اليوم|الليلة|الليله/.test(t)) date = true;
-  let h = null, mi = 0;
-  if (m = t.match(/(?:الساع[هة]|ساع[هة])\s*(\d{1,2})(?::(\d{2}))?\s*(ص|م|صباح|مساء|الصبح|العصر|بالليل|الليل)?/)) {
-    h = +m[1]; mi = +(m[2]||0); const p = m[3]||'';
-    if (/م|مساء|العصر|ليل/.test(p)) { if (h<12) h += 12; } else if (!p && h>=1 && h<=6) h += 12;
-  } else if (m = t.match(/(\d{1,2}):(\d{2})/)) { h = +m[1]; mi = +m[2]; }
-  if (h !== null) { d.setHours(h, mi, 0, 0); if (!date && d<n) d.setDate(d.getDate()+1); return d; }
-  if (date) { if (d.toDateString()===n.toDateString()) d.setTime(n.getTime()+3600e3); else d.setHours(9, 0, 0, 0); return d; }
-  return null;
-}
-
-const whoOf = t => { const m = t.match(/(?:^|\s)(?:عند|من|للـ?|لـ)\s*(?:ال)?([؀-ۿA-Za-z]{2,})/); return m ? m[1] : ''; };
-
-function classify(raw) {
-  const t = norm(raw.trim()), it = { id: uid(), ts: Date.now(), text: raw.trim() };
-  const num = (t.match(/(\d+(?:[.,]\d+)?)/) || [])[1];
-  const numVal = num ? +num.replace(',', '.') : null;
-
-  // 1. Password check
-  if (/باسورد|بسورد|كلم[هة]\s*(ال)?سر|password|pass|pw/i.test(t)) {
-    let v = (t.split(/[:=]|\sهو\s|\sهي\s/)[1] || t.split(/\s+/).pop()).trim();
-    let label = t.replace(v,'').replace(/باسورد|بسورد|كلم[هة]\s*(ال)?سر|password|pass|pw|[:=]|هو|هي/gi,'').trim() || 'بدون عنوان';
-    return Object.assign(it, { type: 'password', label, value: v });
-  }
-
-  // 2. Explicit expense vs income checks
-  const isExp = /صرفت|دفعت|اشتريت|حاسبت|سددت|خدت بـ|خرجت|مصروف|تكلفة|شراء|اشتري/.test(t);
-  const isInc = /قبضت|استلمت|اتحول|حولولي|مرتب|راتب|ايراد|إيراد|دخل|مكافأة|مكافاه|ارباح|أرباح/.test(t);
-
-  if (numVal && isExp && !isInc) {
-    return Object.assign(it, { type: 'money', kind: 'out', amount: numVal, cat: cat(t), who: whoOf(t.replace(num, ' ')) });
-  }
-  if (numVal && isInc && !isExp) {
-    return Object.assign(it, { type: 'money', kind: 'in', amount: numVal, cat: 'دخل', who: whoOf(t.replace(num, ' ')) });
-  }
-
-  // 3. Reminders & Installments
-  const when = parseWhen(t);
-  const rec = /كل\s*اسبوع|كل\s*أسبوع|اسبوعي|أسبوعي/.test(t)?'week':/كل\s*شهر|شهري/.test(t)?'month':/كل\s*سن[هة]|سنوي/.test(t)?'year':'none';
-  const kind = /(?:فلوس|مبلغ|سلف[هة]|دين)\s*(?:ليا|لي|لى)|(?:ليا|لي|لى)\s*(?:عند|فلوس|مبلغ)|عند\s*\S+\s*(?:فلوس|مبلغ|سلف)|هيرجع|هترجع|هيسدد|اسلفت|سلفت/.test(t)?'receivable':/(?:فلوس|مبلغ|سلف[هة]|دين)\s*عليا|عليا\s*(?:فلوس|مبلغ|سلف|دين)|لازم\s*(?:ا|أ)دفع|هسدد|استلفت|اقترضت/.test(t)?'payable':/قسط|اقساط|أقساط/.test(t)?'installment':/فاتور[هة]|ايجار|إيجار|اشتراك|رسوم|كهرب|ميه|مياه|غاز|انترنت|إنترنت/.test(t)?'bill':'normal';
-
-  let at = when;
-  if (!at && rec==='month' && kind!=='normal') {
-    const m = t.match(/يوم\s*(\d{1,2})/);
-    if (m) {
-      at = new Date(); at.setDate(+m[1]); at.setHours(9,0,0,0);
-      if (at < new Date()) at.setMonth(at.getMonth()+1);
-    }
-  }
-  if (at) {
-    const o = { type: 'reminder', at: at.getTime(), done: false, fired: false, pfired: false, kind, rec, lead: kind==='normal'?0:1 };
-    if (kind !== 'normal') {
-      const nums = [...t.matchAll(/(?<![\d\/:.,])(?:(يوم|الساع[هة]|ساع[هة]|بعد)\s*)?(\d+(?:[.,]\d+)?)(?![\d:\/])(?!\s*(?:ايام|أيام|ساع|دق|\/))/g)].filter(m=>!m[1]).map(m=>m[2]);
-      o.amount = nums[0] ? +nums[0].replace(',','.') : (numVal || 0);
-      o.who = whoOf(t);
-    }
-    return Object.assign(it, o);
-  }
-
-  // 4. Ambiguity Resolution: numbers mentioned without clear direction
-  if (numVal || /جنيه|جنية|مبلغ|فلوس/.test(t)) {
-    return Object.assign(it, {
-      type: 'money',
-      kind: 'out', // default
-      isAmbiguous: true, // Flag for ambiguity dialog!
-      amount: numVal || 0,
-      cat: cat(t),
-      who: whoOf(t.replace(num || '', ' '))
-    });
-  }
-
-  if (/https?:\/\//.test(t)) return Object.assign(it, { type: 'link' });
-  if (/(?:\+?\d[\d\s-]{8,}\d)/.test(t)) return Object.assign(it, { type: 'phone' });
-  return Object.assign(it, { type: 'note' });
-}
-
-// ==========================================
-// 11. Views, Tabs & App Rendering
+// 12. Views, Tabs & App Rendering
 // ==========================================
 const TYPES = { note:['📝','ملاحظة'], link:['🔗','رابط'], phone:['📞','رقم'], money:['💰','مصروفات'], reminder:['⏰','تذكير'], password:['🔒','باسورد'] };
 let tab = 'home', filter = 'all', q = '', month = new Date().toISOString().slice(0,7), toast = '';
@@ -1752,13 +1937,13 @@ function home() {
   </div>
   ${homeStats()}
   <div class="card">
-    <textarea id="cap" placeholder="اكتب أو سجل بصوتك… مثال: دفعت 150 للدكتور / فكرني بكرة الساعة 5 اجتماع / باسورد الواي فاي: abc123"></textarea>
+    <textarea id="cap" placeholder="اكتب أو سجل بصوتك… مثال: عندي موعد 25-12 2026 / دفعت 150 للدكتور / باسورد الواي فاي 123456"></textarea>
     <div class="row cap-row">
       <button class="btn acc" id="go">حفظ ومراجعة ✍️</button>
       <span class="meta">Ctrl + Enter للحفظ · زر المايك للتسجيل الصوتي مع التأكيد 🎙️</span>
     </div>
     <div class="chips ex">
-      ${['دفعت 150 للدكتور','فكرني بكرة الساعة 5 اجتماع','قسط العربية 3000 كل شهر يوم 5','باسورد الواي فاي: abc123'].map(x => `<span class="chip" data-ex="${x}">${x}</span>`).join('')}
+      ${['عندي موعد 25-12 2026','دفعت 150 للدكتور','باسورد الفيس 123456','قسط العربية 3000 كل شهر يوم 5'].map(x => `<span class="chip" data-ex="${x}">${x}</span>`).join('')}
     </div>
     ${toast ? `<div class="toast">${toast}</div>` : ''}
   </div>
@@ -1836,7 +2021,7 @@ function pw() {
       <button class="x btn-edit" data-edit="${i.id}" aria-label="تعديل" title="تعديل">✏️</button>
       <button class="x btn-del" data-del="${i.id}" aria-label="حذف" title="حذف">🗑️</button>
     </div>
-  </div>`).join('') || '<div class="card meta">اكتب في الرئيسية مثلاً: باسورد الواي فاي: 12345 وهيتحفظ هنا لوحده مشفراً.</div>'}`;
+  </div>`).join('') || '<div class="card meta">اكتب في الرئيسية أو بالصوت مثلاً: باسورد الواي فاي 123456 وهيتشفر ويتحفظ هنا على طول.</div>'}`;
 }
 
 function rep() {
@@ -1855,14 +2040,13 @@ function rep() {
 function dl(name,txt,type){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type})); a.download = name; a.click(); }
 
 // ==========================================
-// 12. Admin Dashboard View & Controls
+// 13. Admin Dashboard View & Controls
 // ==========================================
 let adminFilterStatus = 'all';
 let adminFilterTier = 'all';
 let adminSearchQ = '';
 
 function renderAdmin() {
-  // Check Admin Master Passcode Auth
   const isAuth = sessionStorage.getItem('sn_admin_auth') === 'true';
   if (!isAuth) {
     $('#admin-auth-modal').hidden = false;
@@ -1874,7 +2058,6 @@ function renderAdmin() {
   ensureProfilesSeeded();
   const now = Date.now();
 
-  // Calculate KPIs
   const totalUsers = PROFILES.length;
   const activeUsers = PROFILES.filter(p => p.status === 'active').length;
   const paidUsers = PROFILES.filter(p => p.tier === 'pro_monthly' || p.tier === 'vip_yearly').length;
@@ -1882,7 +2065,6 @@ function renderAdmin() {
   const suspendedUsers = PROFILES.filter(p => p.status === 'suspended').length;
   const expiringSoon = PROFILES.filter(p => p.status === 'active' && p.expires_at && p.expires_at > now && (p.expires_at - now) <= 7 * 864e5).length;
 
-  // Filtered Users
   const filtered = PROFILES.filter(p => {
     if (adminFilterStatus !== 'all' && p.status !== adminFilterStatus) return false;
     if (adminFilterTier !== 'all' && p.tier !== adminFilterTier) return false;
@@ -1995,24 +2177,20 @@ function renderAdmin() {
             </div>
 
             <div class="uc-actions">
-              <!-- Toggle Status (Suspend / Activate) -->
               <button class="btn btn-sm ${isSuspended ? 'success' : 'danger'}" data-admin-toggle="${u.id}">
                 ${isSuspended ? '🟢 تشغيل وتفعيل الحساب' : '🔴 إيقاف وتجميد الحساب'}
               </button>
 
-              <!-- Extend Subscription -->
               <button class="btn btn-sm ghost" data-admin-ext="${u.id}" data-days="30">➕ مد ٣٠ يوم</button>
               <button class="btn btn-sm ghost" data-admin-ext="${u.id}" data-days="90">➕ مد ٩٠ يوم</button>
               <button class="btn btn-sm ghost" data-admin-ext="${u.id}" data-days="365">➕ مد سنة</button>
 
-              <!-- Change Tier -->
               <select style="width:auto;padding:5px 8px;font-size:12px;border-radius:8px" data-admin-tier="${u.id}">
                 <option value="beta_free" ${u.tier==='beta_free'?'selected':''}>⭐ باقة تجريبية</option>
                 <option value="pro_monthly" ${u.tier==='pro_monthly'?'selected':''}>💎 Pro شهرية (50 ج.م)</option>
                 <option value="vip_yearly" ${u.tier==='vip_yearly'?'selected':''}>👑 VIP سنوية (500 ج.م)</option>
               </select>
 
-              <!-- Delete User -->
               <button class="x btn-del" style="margin-inline-start:auto" data-admin-del="${u.id}" title="حذف العميل نهائياً">🗑️</button>
             </div>
           </div>
@@ -2041,7 +2219,7 @@ function adminExtendSub(id, days) {
   if (!u) return;
   const base = Math.max(Date.now(), u.expires_at || Date.now());
   u.expires_at = base + days * 864e5;
-  u.status = 'active'; // Automatically re-activate if extended!
+  u.status = 'active';
   saveProfiles();
   if (USER && USER.id === u.id) {
     USER.expires_at = u.expires_at;
@@ -2076,7 +2254,6 @@ function adminDeleteUser(id) {
 function handleAdminPasscodeLogin() {
   const p = $('#admin-pass-inp').value.trim();
   const err = $('#admin-auth-err');
-  // Master Admin Passcode (Default: admin2026 or 2026)
   if (p === 'admin2026' || p === '2026' || p === 'admin') {
     sessionStorage.setItem('sn_admin_auth', 'true');
     $('#admin-auth-modal').hidden = true;
@@ -2126,7 +2303,7 @@ function handleAdminAddUser() {
 }
 
 // ==========================================
-// 13. Document Event Listeners
+// 14. Document Event Listeners
 // ==========================================
 document.addEventListener('click', e => {
   const t = e.target;
@@ -2162,6 +2339,24 @@ document.addEventListener('click', e => {
   if (t.id === 'btn-save-edit') saveEditedItem();
   if (t.id === 'btn-cancel-edit' || t.id === 'close-edit') { $('#edit-modal').hidden = true; editingItemId = null; }
 
+  // Installation Shortcut Modal
+  if (t.id === 'btn-close-install') {
+    $('#install-modal').hidden = true;
+    localStorage.setItem('sn_install_prompted', 'true');
+  }
+  if (t.id === 'btn-prof-install') {
+    $('#prof-modal').hidden = true;
+    showInstallModal();
+  }
+  if (t.id === 'btn-pwa-install-action' && deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      $('#install-modal').hidden = true;
+      localStorage.setItem('sn_install_prompted', 'true');
+    });
+  }
+
   // Items Actions
   if (x = g('data-del')) {
     if (confirm('هل أنت متأكد من حذف هذه المعاملة؟')) del(x.dataset.del);
@@ -2188,6 +2383,7 @@ document.addEventListener('click', e => {
     const k = $('#mk').value, n = $('#mn').value;
     add({ id: uid(), ts: Date.now(), type: 'money', kind: k, amount: a, cat: $('#mc').value, who: $('#mw').value.trim(), text: n || (k==='in'?'دخل':'مصروف')+' '+a });
     sfx.play('confirm');
+    speak(k==='in' ? 'تمام يا باشا، اتسجل دخل ' + a + ' جنيه!' : 'تمام يا غالي، اتسجل مصروف ' + a + ' جنيه!');
     toast = '✔ تم تسجيل المعاملة في المصروفات';
     render();
   }
@@ -2197,6 +2393,7 @@ document.addEventListener('click', e => {
     const s = $('#rt').value.trim(), d = $('#rd').value; if (!s||!d) return;
     add({ id: uid(), ts: Date.now(), type: 'reminder', text: s, at: new Date(d).getTime(), done: false, fired: false, pfired: false, kind: 'normal', amount: 0, who: '', rec: 'none', lead: 0 });
     sfx.play('confirm');
+    speak('تمام يا فندم، اتسجل الميعاد والتذكير بنجاح!');
     toast = '✔ تم حفظ التذكير';
     render();
   }
@@ -2212,7 +2409,7 @@ document.addEventListener('click', e => {
   if (t.id === 'csv') {
     const ms = S.items.filter(i => i.type==='money');
     const csvHeader = String.fromCharCode(0xFEFF) + 'التاريخ,النوع,المبلغ,التصنيف,الجهة,ملاحظة' + String.fromCharCode(10);
-    const csvRows = ms.map(i=>[new Date(i.ts).toLocaleDateString('en-CA'),i.kind==='in'?'دخل':'مصروف',i.amount,i.cat,i.who,'"'+i.text.replace(/"/g,'""')+'"'].join(',')).join(String.fromCharCode(10));
+    const csvRows = ms.map(i=>[new Date(i.ts).toLocaleDateString('en-CA'),i.kind==='in'?'دخل':'مصروف',i.amount,i.cat,i.who,'\"'+i.text.replace(/\"/g,'\"\"')+'\"'].join(',')).join(String.fromCharCode(10));
     dl('expenses.csv', csvHeader + csvRows, 'text/csv');
   }
   if (t.id === 'bk') dl('smart-notes-backup.json', JSON.stringify(S), 'application/json');
@@ -2262,10 +2459,15 @@ document.addEventListener('keydown', e => {
   lastAct = Date.now();
 });
 
-// Listen for hashchange (Routing between App and Admin)
+// Routing
 window.addEventListener('hashchange', () => {
   if (isAdminPath()) renderAdmin();
-  else render();
+  else {
+    render();
+    if (window.location.hash === '#mic') {
+      setTimeout(() => { micToggle(); }, 300);
+    }
+  }
 });
 
 // Auto Lock on Idle & Background
