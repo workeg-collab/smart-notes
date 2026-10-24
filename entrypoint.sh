@@ -2,7 +2,7 @@
 set -e
 
 echo "[SmartNotes] Starting Node API server on port 3000..."
-node /app/server.js &
+PORT=3000 node /app/server.js &
 NODE_PID=$!
 
 echo "[SmartNotes] Starting Nginx web server on port 80..."

@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000; // Always use internal port 3000 for Node API to prevent collision with Coolify PORT=80
 const DATA_DIR = process.env.DATA_DIR || (fs.existsSync('/app/data') ? '/app/data' : path.join(__dirname, 'data'));
 
 if (!fs.existsSync(DATA_DIR)) {
