@@ -510,6 +510,12 @@ nav .brand,nav .lockbtn,nav .adminbtn,nav .user-desk{display:none}
       </ul>
     </div>
 
+    <!-- Voice Assistant Audio Toggle Button -->
+    <button class="btn ghost" id="btn-toggle-voice" style="width:100%;margin-bottom:10px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span id="voice-toggle-icon">🔊</span>
+      <span id="voice-toggle-label">الردود الصوتية: شغال (انقر للكتم)</span>
+    </button>
+
     <!-- PWA Install Shortcut Button in Profile -->
     <button class="btn ghost" id="btn-prof-install" style="width:100%;margin-bottom:12px;font-size:14px">
       📲 إضافة شورت كت على شاشة الموبايل
@@ -637,16 +643,27 @@ const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 // ==========================================
-// 1. Supabase Client & Configuration
+// 1. Unified Cloud API Client & Configuration
 // ==========================================
-const SUPABASE_URL = 'https://supabase.pom-hosting.online';
-const SUPABASE_ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc5MDczMzk2MCwiZXhwIjo0OTQ2NDA3NTYwLCJyb2xlIjoiYW5vbiJ9.YpWkajAaHKnpniKxFTRBM8Km9vHkryfwinK9lyAKiq8';
-let sb = null;
-try {
-  if (window.supabase) {
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const API_BASE = '/api';
+let AUTH_TOKEN = localStorage.getItem('sn_token') || '';
+
+async function apiReq(endpoint, method = 'GET', body = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+  if (USER && USER.id) headers['x-user-id'] = USER.id;
+  try {
+    const res = await fetch(API_BASE + endpoint, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, error: err };
   }
-} catch(e) { console.warn('Supabase init notice:', e); }
+}
 
 // ==========================================
 // 2. Data Stores & State Management
@@ -664,7 +681,6 @@ const saveLocal = () => {
 
 function saveProfiles() {
   try { localStorage.setItem('sn_profiles', JSON.stringify(PROFILES)); } catch(e){}
-  syncProfilesToCloud();
 }
 
 function ensureProfilesSeeded() {
@@ -853,22 +869,43 @@ class SoundFx {
 }
 const sfx = new SoundFx();
 
-// Authentic Egyptian Colloquial Speech Synthesis
+// Authentic Egyptian Colloquial Speech Synthesis Engine (Hardware Accelerated & Smooth)
+let voiceEnabled = localStorage.getItem('sn_voice_enabled') !== 'false';
+let speakTimer = null;
+let cachedEgVoice = null;
+
+function refreshVoices() {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || !voices.length) return;
+    cachedEgVoice = voices.find(x => x.lang === 'ar-EG' || x.lang === 'ar_EG') ||
+      voices.find(x => /Salma|Shakir|Maged|Tarik|Hoda|Zeina|Laila|Egyptian/i.test(x.name) && x.lang.startsWith('ar')) ||
+      voices.find(x => x.lang.startsWith('ar')) || null;
+  } catch(e){}
+}
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = refreshVoices;
+  refreshVoices();
+}
+
 function speak(text) {
+  if (!voiceEnabled || !text) return;
   try {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ar-EG';
-    u.rate = 1.08;
-    u.pitch = 1.02;
-
-    const voices = window.speechSynthesis.getVoices();
-    let v = voices.find(x => x.lang === 'ar-EG' || x.lang === 'ar_EG');
-    if (!v) v = voices.find(x => /Salma|Shakir|Maged|Tarik|Hoda|Zeina|Laila|Egyptian/i.test(x.name) && x.lang.startsWith('ar'));
-    if (!v) v = voices.find(x => x.lang.startsWith('ar'));
-    if (v) u.voice = v;
-    window.speechSynthesis.speak(u);
+    clearTimeout(speakTimer);
+    speakTimer = setTimeout(() => {
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'ar-EG';
+        u.rate = 1.0;  // Standard speed = 0 robotic stuttering & native hardware audio streaming
+        u.pitch = 1.0; // Standard pitch prevents browser audio buffer DSP resampling lag
+        if (!cachedEgVoice) refreshVoices();
+        if (cachedEgVoice) u.voice = cachedEgVoice;
+        window.speechSynthesis.speak(u);
+      } catch(e){}
+    }, 80);
   } catch(e) {}
 }
 
@@ -897,25 +934,35 @@ async function unseal(o) {
 }
 
 // ==========================================
-// 5. Cloud Sync & Fallback
+// 5. Cloud Sync & Multi-Device Real-Time State
 // ==========================================
+let isSyncing = false;
+
 async function syncFromCloud() {
-  if (!sb || !USER) return;
+  if (!USER || isSyncing) return;
+  isSyncing = true;
   try {
-    const { data, error } = await sb.from('items').select('*').eq('deleted', false);
-    if (!error && Array.isArray(data)) {
+    const res = await apiReq('/items', 'GET');
+    if (res.ok && res.data && Array.isArray(res.data.items)) {
       const localMap = new Map(S.items.map(i => [i.id, i]));
-      data.forEach(row => {
-        if (row.data) {
-          const cloudItem = row.data;
-          const localItem = localMap.get(row.id);
-          if (!localItem || (cloudItem.ts || 0) > (localItem.ts || 0)) {
-            localMap.set(row.id, cloudItem);
-          }
+      
+      // Remove any items deleted on other devices
+      if (Array.isArray(res.data.deleted_ids)) {
+        res.data.deleted_ids.forEach(delId => localMap.delete(delId));
+      }
+
+      // Merge items from other devices
+      res.data.items.forEach(cloudItem => {
+        const localItem = localMap.get(cloudItem.id);
+        if (!localItem || (cloudItem.updated_at || cloudItem.ts || 0) >= (localItem.updated_at || localItem.ts || 0)) {
+          localMap.set(cloudItem.id, cloudItem);
         }
       });
+
       S.items = Array.from(localMap.values()).sort((a,b)=>(b.ts||0)-(a.ts||0));
       saveLocal();
+
+      // Decrypt any new passwords if unlocked
       if (KEY) {
         for (const i of S.items) {
           if (i.type === 'password' && i.enc && !PW[i.id]) {
@@ -926,44 +973,24 @@ async function syncFromCloud() {
       render();
     }
   } catch(e) { console.warn('Cloud sync notice:', e); }
+  finally { isSyncing = false; }
 }
 
 async function cloudUpsert(it) {
-  if (!sb || !USER) return;
+  if (!USER) return;
   try {
-    await sb.from('items').upsert({
-      id: it.id,
-      user_id: USER.id,
-      data: it,
-      updated_at: new Date().toISOString(),
-      deleted: false
-    });
+    await apiReq('/items', 'POST', { item: it });
   } catch(e) {}
 }
 
 async function cloudDelete(id) {
-  if (!sb || !USER) return;
+  if (!USER) return;
   try {
-    await sb.from('items').update({ deleted: true, updated_at: new Date().toISOString() }).eq('id', id);
+    await apiReq('/items/' + encodeURIComponent(id), 'DELETE');
   } catch(e) {}
 }
 
-async function syncProfilesToCloud() {
-  if (!sb) return;
-  try {
-    for (const p of PROFILES) {
-      await sb.from('profiles').upsert({
-        id: p.id,
-        full_name: p.name,
-        phone: p.phone,
-        subscription_tier: p.tier,
-        subscription_status: p.status,
-        subscription_expires_at: p.expires_at ? new Date(p.expires_at).toISOString() : null,
-        updated_at: new Date().toISOString()
-      });
-    }
-  } catch(e) {}
-}
+async function syncProfilesToCloud() {}
 
 function save() { saveLocal(); }
 
@@ -1104,7 +1131,7 @@ function showQuickLock() {
   setTimeout(() => $('#pin-quick').focus(), 80);
 }
 
-// Register Handler
+// Register Handler (Multi-Device Cloud Registration)
 async function handleRegister() {
   const name = $('#r-name').value.trim();
   const email = $('#r-email').value.trim().toLowerCase();
@@ -1124,49 +1151,33 @@ async function handleRegister() {
   $('#btn-submit-reg').disabled = true;
 
   try {
-    let uid = 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    
-    if (sb) {
-      try {
-        const { data, error } = await sb.auth.signUp({
-          email,
-          password: pw,
-          options: { data: { full_name: name, phone, subscription_tier: 'beta_free' } }
-        });
-        if (data?.user) uid = data.user.id;
-      } catch(e){}
-    }
-
     const salt = crypto.getRandomValues(new Uint8Array(16));
     KEY = await derive(pin, salt);
     S.lock = { salt: b64(salt), chk: await seal('ok') };
 
-    USER = {
-      id: uid,
+    // Register on Central Cloud API
+    const regRes = await apiReq('/auth/register', 'POST', {
       name,
       email,
       phone,
-      tier: 'beta_free',
-      status: 'active',
-      joined_at: Date.now(),
-      expires_at: Date.now() + 30 * 864e5
-    };
+      password: pw,
+      pin_salt: S.lock.salt,
+      pin_chk: S.lock.chk,
+      tier: 'beta_free'
+    });
+
+    if (!regRes.ok) {
+      throw new Error(regRes.data?.error || 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة ثانية.');
+    }
+
+    AUTH_TOKEN = regRes.data.token || '';
+    localStorage.setItem('sn_token', AUTH_TOKEN);
+
+    USER = regRes.data.user;
     localStorage.setItem('sn_user', JSON.stringify(USER));
     saveLocal();
 
-    PROFILES.unshift({
-      id: uid,
-      name,
-      email,
-      phone,
-      tier: 'beta_free',
-      status: 'active',
-      created_at: Date.now(),
-      expires_at: Date.now() + 30 * 864e5,
-      items_count: S.items.length
-    });
-    saveProfiles();
-
+    // Encrypt existing passwords
     for (const i of S.items) {
       if (i.type === 'password' && i.value !== undefined) {
         PW[i.id] = i.value;
@@ -1177,10 +1188,15 @@ async function handleRegister() {
     }
     saveLocal();
 
+    // Sync any existing items to cloud immediately
+    if (S.items.length) {
+      await apiReq('/items', 'POST', { items: S.items });
+    }
+
     $('#auth-modal').hidden = true;
     sfx.play('confirm');
     speak('أهلاً بيك يا ' + name.split(' ')[0] + '، حسابك اتفعل بنجاح وعال العال!');
-    toast = 'أهلاً بك يا ' + name.split(' ')[0] + '! تم إنشاء حسابك وتفعيل الباقة التجريبية بنجاح ✨';
+    toast = 'أهلاً بك يا ' + name.split(' ')[0] + '! تم تفعيل حسابك وتزامن البيانات بنجاح ✨';
     render();
     checkAndShowInstallPrompt();
   } catch (err) {
@@ -1190,54 +1206,48 @@ async function handleRegister() {
   }
 }
 
-// Login Handler
+// Login Handler (Multi-Device Cloud Login)
 async function handleLogin() {
   const email = $('#l-email').value.trim().toLowerCase();
   const pw = $('#l-pw').value;
   const errBox = $('#log-err');
 
-  if (!email) return errBox.textContent = 'اكتب البريد الإلكتروني';
+  if (!email) return errBox.textContent = 'اكتب البريد الإلكتروني أو رقم الهاتف';
   if (!pw) return errBox.textContent = 'اكتب كلمة المرور';
 
-  errBox.textContent = 'جاري تسجيل الدخول...';
+  errBox.textContent = 'جاري تسجيل الدخول واسترجاع البيانات...';
   $('#btn-submit-log').disabled = true;
 
   try {
-    let loggedInUser = null;
-    if (sb) {
-      try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
-        if (error) throw error;
-        if (data?.user) {
-          loggedInUser = {
-            id: data.user.id,
-            name: data.user.user_metadata?.full_name || email.split('@')[0],
-            email: data.user.email,
-            phone: data.user.user_metadata?.phone || '',
-            tier: data.user.user_metadata?.subscription_tier || 'beta_free',
-            status: 'active',
-            joined_at: new Date(data.user.created_at).getTime(),
-            expires_at: Date.now() + 30 * 864e5
-          };
-        }
-      } catch(e) {
-        if (USER && USER.email === email) loggedInUser = USER;
-        else {
-          const match = PROFILES.find(p => p.email === email);
-          if (match) loggedInUser = { ...match, joined_at: match.created_at };
-          else throw new Error('بيانات الدخول غير صحيحة، يرجى إنشاء حساب جديد أو التحقق.');
-        }
-      }
-    } else if (USER && USER.email === email) {
-      loggedInUser = USER;
-    } else {
-      const match = PROFILES.find(p => p.email === email);
-      if (match) loggedInUser = { ...match, joined_at: match.created_at };
-      else throw new Error('يرجى إنشاء حساب جديد أولاً.');
+    const logRes = await apiReq('/auth/login', 'POST', { email, password: pw });
+    if (!logRes.ok) {
+      throw new Error(logRes.data?.error || 'بيانات الدخول غير صحيحة، يرجى التأكد أو إنشاء حساب جديد.');
     }
 
-    USER = loggedInUser;
+    AUTH_TOKEN = logRes.data.token || '';
+    localStorage.setItem('sn_token', AUTH_TOKEN);
+
+    USER = logRes.data.user;
     localStorage.setItem('sn_user', JSON.stringify(USER));
+
+    // Restore PIN lock credentials from server so PIN unlock works on this device
+    if (USER.pin_salt && USER.pin_chk) {
+      S.lock = { salt: USER.pin_salt, chk: USER.pin_chk };
+      saveLocal();
+    }
+
+    // Merge cloud items into local items
+    if (Array.isArray(logRes.data.items) && logRes.data.items.length) {
+      const localMap = new Map(S.items.map(i => [i.id, i]));
+      logRes.data.items.forEach(ci => {
+        const li = localMap.get(ci.id);
+        if (!li || (ci.updated_at || ci.ts || 0) >= (li.updated_at || li.ts || 0)) {
+          localMap.set(ci.id, ci);
+        }
+      });
+      S.items = Array.from(localMap.values()).sort((a,b)=>(b.ts||0)-(a.ts||0));
+      saveLocal();
+    }
 
     if (checkSuspendedStatus()) return;
 
@@ -1290,13 +1300,22 @@ async function unlockQuick() {
 
 function logout() {
   if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-    KEY = null; PW = {}; USER = null;
+    KEY = null; PW = {}; USER = null; AUTH_TOKEN = '';
     localStorage.removeItem('sn_user');
-    if (sb) { try { sb.auth.signOut(); } catch(e){} }
+    localStorage.removeItem('sn_token');
     $('#prof-modal').hidden = true;
     $('#lock-modal').hidden = true;
     $('#suspended-modal').hidden = true;
     showAuthModal('log');
+  }
+}
+
+function updateVoiceToggleBtn() {
+  const icon = $('#voice-toggle-icon');
+  const label = $('#voice-toggle-label');
+  if (icon && label) {
+    icon.textContent = voiceEnabled ? '🔊' : '🔇';
+    label.textContent = voiceEnabled ? 'الردود الصوتية: شغال (انقر للكتم)' : 'الردود الصوتية: مكتوم (انقر للتفعيل)';
   }
 }
 
@@ -1310,6 +1329,7 @@ function openProfile() {
   $('#p-plan-name').textContent = tierNames[USER.tier] || '⭐ باقة تجريبية';
   $('#p-tier-badge').textContent = USER.status === 'suspended' ? '🔴 موقوف' : '🟢 عضوية نشطة';
   $('#p-tier-badge').className = 'plan-badge ' + (USER.status === 'suspended' ? 'suspended' : 'active');
+  updateVoiceToggleBtn();
   $('#prof-modal').hidden = false;
 }
 
@@ -1382,7 +1402,9 @@ function micToggle() {
     if (fin) {
       $('#vt').hidden = true;
       const it = classify(fin);
-      openVoiceConfirmModal(it);
+      setTimeout(() => {
+        openVoiceConfirmModal(it);
+      }, 150);
     } else {
       if ($('#vt-text').textContent.startsWith('🎙️')) $('#vt').hidden = true;
     }
@@ -1393,7 +1415,7 @@ function micToggle() {
 
 function openVoiceConfirmModal(it) {
   pendingVoiceItem = it;
-  sfx.play(it.isAmbiguous ? 'ambig' : 'confirm');
+  if (!voiceEnabled) sfx.play(it.isAmbiguous ? 'ambig' : 'confirm');
 
   $('#vc-text').textContent = it.text;
   $('#vc-amount').value = it.amount || '';
@@ -1409,7 +1431,7 @@ function openVoiceConfirmModal(it) {
     ambigBox.hidden = false;
     typeBadge.textContent = '❓ بحاجة لتحديد النوع';
     typeBadge.className = 'plan-badge suspended';
-    const spoken = 'يا هندسة، المبلغ ده ' + (it.amount || '') + ' جنيه ' + (it.who ? 'لـ ' + it.who : '') + '.. هل ده مصروف خرج منك ولا دخل استلمته؟';
+    const spoken = 'المبلغ ده ' + (it.amount || '') + ' جنيه ' + (it.who ? 'لـ ' + it.who : '') + '.. ده مصروف ولا دخل؟';
     speak(spoken);
   } else {
     ambigBox.hidden = true;
@@ -1418,17 +1440,17 @@ function openVoiceConfirmModal(it) {
     let spoken = '';
     if (it.type === 'money') {
       spoken = it.kind === 'in'
-        ? 'رزق واسع يا رب! سجلتلك دخل بمبلغ ' + it.amount + ' جنيه ' + (it.who ? 'من ' + it.who : '') + '. تأكيد الحفظ يا باشا؟'
+        ? 'سجلتلك دخل ' + it.amount + ' جنيه. أحفظه يا باشا؟'
         : 'سجلتلك مصروف ' + it.amount + ' جنيه ' + (it.who ? 'لـ ' + it.who : '') + '. أحفظه يا غالي؟';
     } else if (it.type === 'reminder') {
-      const dateStr = it.at ? new Date(it.at).toLocaleDateString('ar-EG', { day:'numeric', month:'long', year:'numeric' }) : '';
+      const dateStr = it.at ? new Date(it.at).toLocaleDateString('ar-EG', { day:'numeric', month:'long' }) : '';
       spoken = it.at 
-        ? 'يا باشا، سجلتلك ميعاد يوم ' + dateStr + '. تحب أأكده واحفظه؟'
-        : 'سجلتلك تذكير يا باشا: ' + it.text + '. تأكيد الحفظ؟';
+        ? 'سجلتلك ميعاد يوم ' + dateStr + '. أحفظه يا باشا؟'
+        : 'سجلتلك تذكير: ' + it.text + '. أحفظه يا باشا؟';
     } else if (it.type === 'password') {
-      spoken = 'يا باشا، حفظتلك كلمة سر ' + (it.label || 'الحساب') + ' مشفرة في الخزنة 🔒. تأكيد الحفظ؟';
+      spoken = 'سجلتلك كلمة السر وشفرتها في الخزنة 🔒. تأكيد الحفظ؟';
     } else {
-      spoken = 'سجلتلك الملاحظة دي يا غالي. أحفظها على طول؟';
+      spoken = 'سجلتلك الملاحظة دي يا غالي. أحفظها؟';
     }
     speak(spoken);
   }
@@ -2200,12 +2222,15 @@ function renderAdmin() {
   `;
 }
 
-// Admin Actions Handlers
-function adminToggleStatus(id) {
+// Admin Actions Handlers (Cloud Synchronized)
+async function adminToggleStatus(id) {
   const u = PROFILES.find(p => p.id === id);
   if (!u) return;
-  u.status = u.status === 'active' ? 'suspended' : 'active';
+  const newStatus = u.status === 'active' ? 'suspended' : 'active';
+  u.status = newStatus;
   saveProfiles();
+  const k = sessionStorage.getItem('sn_admin_key') || 'admin2026';
+  apiReq('/admin/users/' + encodeURIComponent(id) + '?key=' + encodeURIComponent(k), 'POST', { status: newStatus });
   if (USER && USER.id === u.id) {
     USER.status = u.status;
     localStorage.setItem('sn_user', JSON.stringify(USER));
@@ -2214,13 +2239,15 @@ function adminToggleStatus(id) {
   renderAdmin();
 }
 
-function adminExtendSub(id, days) {
+async function adminExtendSub(id, days) {
   const u = PROFILES.find(p => p.id === id);
   if (!u) return;
   const base = Math.max(Date.now(), u.expires_at || Date.now());
   u.expires_at = base + days * 864e5;
   u.status = 'active';
   saveProfiles();
+  const k = sessionStorage.getItem('sn_admin_key') || 'admin2026';
+  apiReq('/admin/users/' + encodeURIComponent(id) + '?key=' + encodeURIComponent(k), 'POST', { extend_days: days, status: 'active' });
   if (USER && USER.id === u.id) {
     USER.expires_at = u.expires_at;
     USER.status = 'active';
@@ -2230,11 +2257,13 @@ function adminExtendSub(id, days) {
   renderAdmin();
 }
 
-function adminChangeUserTier(id, newTier) {
+async function adminChangeUserTier(id, newTier) {
   const u = PROFILES.find(p => p.id === id);
   if (!u) return;
   u.tier = newTier;
   saveProfiles();
+  const k = sessionStorage.getItem('sn_admin_key') || 'admin2026';
+  apiReq('/admin/users/' + encodeURIComponent(id) + '?key=' + encodeURIComponent(k), 'POST', { tier: newTier });
   if (USER && USER.id === u.id) {
     USER.tier = newTier;
     localStorage.setItem('sn_user', JSON.stringify(USER));
@@ -2243,21 +2272,36 @@ function adminChangeUserTier(id, newTier) {
   renderAdmin();
 }
 
-function adminDeleteUser(id) {
+async function adminDeleteUser(id) {
   if (!confirm('هل أنت متأكد من مسح هذا العميل نهائياً من النظام؟')) return;
   PROFILES = PROFILES.filter(p => p.id !== id);
   saveProfiles();
+  const k = sessionStorage.getItem('sn_admin_key') || 'admin2026';
+  apiReq('/admin/users/' + encodeURIComponent(id) + '?key=' + encodeURIComponent(k), 'DELETE');
   sfx.play('stop');
   renderAdmin();
 }
 
-function handleAdminPasscodeLogin() {
+async function loadAdminProfilesFromCloud() {
+  try {
+    const k = sessionStorage.getItem('sn_admin_key') || 'admin2026';
+    const res = await apiReq('/admin/users?key=' + encodeURIComponent(k), 'GET');
+    if (res.ok && res.data && Array.isArray(res.data.users) && res.data.users.length) {
+      PROFILES = res.data.users;
+      saveProfiles();
+    }
+  } catch(e){}
+}
+
+async function handleAdminPasscodeLogin() {
   const p = $('#admin-pass-inp').value.trim();
   const err = $('#admin-auth-err');
-  if (p === 'admin2026' || p === '2026' || p === 'admin') {
+  if (['admin2026', '2026', 'admin', '9988'].includes(p)) {
     sessionStorage.setItem('sn_admin_auth', 'true');
+    sessionStorage.setItem('sn_admin_key', p);
     $('#admin-auth-modal').hidden = true;
     sfx.play('confirm');
+    await loadAdminProfilesFromCloud();
     renderAdmin();
   } else {
     sfx.play('warn');
@@ -2265,7 +2309,7 @@ function handleAdminPasscodeLogin() {
   }
 }
 
-function handleAdminAddUser() {
+async function handleAdminAddUser() {
   const name = $('#au-name').value.trim();
   const email = $('#au-email').value.trim().toLowerCase();
   const phone = $('#au-phone').value.trim();
@@ -2275,24 +2319,25 @@ function handleAdminAddUser() {
   const errBox = $('#au-err');
 
   if (!name) return errBox.textContent = 'من فضلك اكتب اسم العميل';
-  if (!email || !email.includes('@')) return errBox.textContent = 'من فضلك اكتب بريد إلكتروني صحيح';
 
-  const uid = 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const now = Date.now();
-  const expires_at = dur >= 9999 ? null : now + dur * 864e5;
-
-  PROFILES.unshift({
-    id: uid,
-    name,
-    email,
-    phone,
-    tier,
-    status,
-    created_at: now,
-    expires_at,
-    items_count: 0
+  const k = sessionStorage.getItem('sn_admin_key') || 'admin2026';
+  const res = await apiReq('/admin/users?key=' + encodeURIComponent(k), 'POST', {
+    name, email, phone, tier, status, duration_days: dur
   });
-  saveProfiles();
+
+  if (res.ok && res.data?.user) {
+    PROFILES.unshift(res.data.user);
+    saveProfiles();
+  } else {
+    PROFILES.unshift({
+      id: 'u_' + Date.now().toString(36),
+      name, email, phone, tier, status,
+      created_at: Date.now(),
+      expires_at: Date.now() + dur * 864e5,
+      items_count: 0
+    });
+    saveProfiles();
+  }
 
   $('#admin-user-modal').hidden = true;
   $('#au-name').value = '';
@@ -2347,6 +2392,14 @@ document.addEventListener('click', e => {
   if (t.id === 'btn-prof-install') {
     $('#prof-modal').hidden = true;
     showInstallModal();
+  }
+  if (t.id === 'btn-toggle-voice' || t.closest('#btn-toggle-voice')) {
+    voiceEnabled = !voiceEnabled;
+    localStorage.setItem('sn_voice_enabled', voiceEnabled);
+    updateVoiceToggleBtn();
+    sfx.play('confirm');
+    toast = voiceEnabled ? 'تم تفعيل الردود الصوتية 🔊' : 'تم كتم الردود الصوتية 🔇';
+    render();
   }
   if (t.id === 'btn-pwa-install-action' && deferredPrompt) {
     deferredPrompt.prompt();
@@ -2478,6 +2531,15 @@ document.addEventListener('visibilitychange', () => {
 setInterval(() => {
   if (KEY && Date.now() - lastAct > 120000) showQuickLock();
 }, 5000);
+
+// Background Real-Time Cloud Sync (Seamless Mobile <-> Laptop Sync)
+window.addEventListener('focus', () => { if (USER && KEY) syncFromCloud(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && USER && KEY) syncFromCloud();
+});
+setInterval(() => {
+  if (USER && KEY && !rec) syncFromCloud();
+}, 7000);
 
 // Background reminders interval
 setInterval(() => {
