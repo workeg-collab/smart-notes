@@ -47,8 +47,8 @@ create table if not exists public.profiles (
   phone text,
   pin_salt text,
   pin_chk jsonb,
-  subscription_tier text default 'beta_free' not null, -- beta_free, pro_monthly, pro_yearly
-  subscription_status text default 'active' not null, -- active, past_due, canceled
+  subscription_tier text default 'beta_free' not null, -- beta_free, pro_monthly, vip_yearly
+  subscription_status text default 'active' not null, -- active, past_due, canceled, suspended
   subscription_expires_at timestamptz,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
